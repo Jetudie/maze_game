@@ -23,22 +23,13 @@ window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("Maze Game")
 
 # Generate the maze
-maze = []
-for i in range(MAZE_HEIGHT):
-    row = []
-    for j in range(MAZE_WIDTH):
-        if i == 0 or i == MAZE_HEIGHT - 1 or j == 0 or j == MAZE_WIDTH - 1:
-            row.append(1)  # Boundary walls
-        elif i % 2 == 0 and j % 2 == 0:
-            row.append(1)  # Inner walls
-        else:
-            row.append(0)  # Path
-    maze.append(row)
-
-# Recursive backtracking algorithm to generate the maze
+# Initialize with all walls
+maze = [[1] * MAZE_WIDTH for _ in range(MAZE_HEIGHT)]
 
 
 def generate_maze(x, y):
+    maze[y][x] = 0  # Mark current cell as a path
+
     directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
     random.shuffle(directions)
 
@@ -55,10 +46,16 @@ generate_maze(1, 1)
 # Randomly block certain routes to ensure only one path to the destination
 for i in range(2, MAZE_HEIGHT - 1, 2):
     for j in range(2, MAZE_WIDTH - 1, 2):
-        if random.random() < 0.3:
-            if maze[i][j - 1] == 0 and maze[i][j + 1] == 0:
-                maze[i][j] = 1
-            elif maze[i - 1][j] == 0 and maze[i + 1][j] == 0:
+        if maze[i][j] == 0 and random.random() < 0.3:
+            neighbors = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
+            random.shuffle(neighbors)
+            blocked = False
+            for nx, ny in neighbors:
+                if maze[ny][nx] == 1:
+                    maze[ny][nx] = 1
+                    blocked = True
+                    break
+            if not blocked:
                 maze[i][j] = 1
 
 # Player starting position
