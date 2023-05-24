@@ -3,9 +3,9 @@ import random
 import csv
 
 # Maze parameters
-MAZE_WIDTH = 25
-MAZE_HEIGHT = 25
-CELL_SIZE = 20
+MAZE_WIDTH = 11
+MAZE_HEIGHT = 11
+CELL_SIZE = 30
 WALL_THICKNESS = 4
 
 # Colors
@@ -77,20 +77,23 @@ player_y = 1
 destination_x = MAZE_WIDTH - 2
 destination_y = MAZE_HEIGHT - 2
 
-# Load questions and choices from CSV file
+# Load questions, choices, and answers from CSV file
 questions = []
 choices = []
+answers = []
 
 with open("QA.csv", "r") as csvfile:
-    reader = csv.reader(csvfile)
-    next(reader)  # Skip the header
+    reader = csv.DictReader(csvfile)
     for row in reader:
-        question = row[0]
-        choice1 = row[1]
-        choice2 = row[2]
-        choice3 = row[3]
+        question = row["Question"]
+        choice1 = row["Choice 1"]
+        choice2 = row["Choice 2"]
+        choice3 = row["Choice 3"]
+        answer = row["Answer"]
+
         choices.append([choice1, choice2, choice3])
         questions.append(question)
+        answers.append(answer)
 
 # Game states
 GAME_STATE_MAZE = 0
@@ -98,6 +101,9 @@ GAME_STATE_QUESTION = 1
 
 # Set initial game state
 game_state = GAME_STATE_MAZE
+
+# Initialize the result
+result = ""
 
 # Game loop
 running = True
@@ -118,16 +124,22 @@ while running:
             elif game_state == GAME_STATE_QUESTION:
                 if event.key == pygame.K_1:
                     # Process user answer (1st choice)
-                    # TODO: Add your answer processing logic here
-                    pass
+                    if choices[0][0] == answers[0]:
+                        result = "Correct!"
+                    else:
+                        result = "Wrong!"
                 elif event.key == pygame.K_2:
                     # Process user answer (2nd choice)
-                    # TODO: Add your answer processing logic here
-                    pass
+                    if choices[0][1] == answers[0]:
+                        result = "Correct!"
+                    else:
+                        result = "Wrong!"
                 elif event.key == pygame.K_3:
                     # Process user answer (3rd choice)
-                    # TODO: Add your answer processing logic here
-                    pass
+                    if choices[0][2] == answers[0]:
+                        result = "Correct!"
+                    else:
+                        result = "Wrong!"
 
     window.fill(BLACK)
 
@@ -163,8 +175,9 @@ while running:
             choice_texts.append(choice_text)
             window.blit(choice_text, (20, 60 + i * 30))
 
-        # Render result (dummy text)
-        result_text = font.render("Correct!", True, WHITE)
+        # Render result
+        result_text_color = GREEN if result == "Correct!" else RED
+        result_text = font.render(result, True, result_text_color)
         window.blit(result_text, (20, window_height - 50))
 
     # Update the display
