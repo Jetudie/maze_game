@@ -52,6 +52,15 @@ def generate_maze(x, y):
 
 generate_maze(1, 1)
 
+# Randomly block certain routes to ensure only one path to the destination
+for i in range(2, MAZE_HEIGHT - 1, 2):
+    for j in range(2, MAZE_WIDTH - 1, 2):
+        if random.random() < 0.3:
+            if maze[i][j - 1] == 0 and maze[i][j + 1] == 0:
+                maze[i][j] = 1
+            elif maze[i - 1][j] == 0 and maze[i + 1][j] == 0:
+                maze[i][j] = 1
+
 # Player starting position
 player_x = 1
 player_y = 1
