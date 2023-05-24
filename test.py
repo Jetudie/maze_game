@@ -40,6 +40,16 @@ def generate_maze(x, y):
             maze[ny][nx] = 0
             generate_maze(nx, ny)
 
+            # Add random extra paths
+            if random.random() < 0.2:
+                random_direction = random.choice(directions)
+                extra_nx, extra_ny = nx + \
+                    random_direction[0], ny + random_direction[1]
+                if 0 <= extra_nx < MAZE_WIDTH and 0 <= extra_ny < MAZE_HEIGHT and maze[extra_ny][extra_nx] == 1:
+                    maze[ny][nx] = 0
+                    maze[extra_ny][extra_nx] = 0
+                    generate_maze(extra_nx, extra_ny)
+
 
 generate_maze(1, 1)
 
