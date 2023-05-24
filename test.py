@@ -2,9 +2,9 @@ import pygame
 import random
 
 # Maze parameters
-MAZE_WIDTH = 15
-MAZE_HEIGHT = 15
-CELL_SIZE = 30
+MAZE_WIDTH = 25
+MAZE_HEIGHT = 25
+CELL_SIZE = 20
 WALL_THICKNESS = 4
 
 # Colors
