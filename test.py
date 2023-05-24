@@ -1,5 +1,6 @@
 import pygame
 import random
+import csv
 
 # Maze parameters
 MAZE_WIDTH = 25
@@ -76,6 +77,28 @@ player_y = 1
 destination_x = MAZE_WIDTH - 2
 destination_y = MAZE_HEIGHT - 2
 
+# Load questions and choices from CSV file
+questions = []
+choices = []
+
+with open("QA.csv", "r") as csvfile:
+    reader = csv.reader(csvfile)
+    next(reader)  # Skip the header
+    for row in reader:
+        question = row[0]
+        choice1 = row[1]
+        choice2 = row[2]
+        choice3 = row[3]
+        choices.append([choice1, choice2, choice3])
+        questions.append(question)
+
+# Game states
+GAME_STATE_MAZE = 0
+GAME_STATE_QUESTION = 1
+
+# Set initial game state
+game_state = GAME_STATE_MAZE
+
 # Game loop
 running = True
 while running:
@@ -83,40 +106,66 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP and maze[player_y - 1][player_x] == 0:
-                player_y -= 1
-            elif event.key == pygame.K_DOWN and maze[player_y + 1][player_x] == 0:
-                player_y += 1
-            elif event.key == pygame.K_LEFT and maze[player_y][player_x - 1] == 0:
-                player_x -= 1
-            elif event.key == pygame.K_RIGHT and maze[player_y][player_x + 1] == 0:
-                player_x += 1
+            if game_state == GAME_STATE_MAZE:
+                if event.key == pygame.K_UP and maze[player_y - 1][player_x] == 0:
+                    player_y -= 1
+                elif event.key == pygame.K_DOWN and maze[player_y + 1][player_x] == 0:
+                    player_y += 1
+                elif event.key == pygame.K_LEFT and maze[player_y][player_x - 1] == 0:
+                    player_x -= 1
+                elif event.key == pygame.K_RIGHT and maze[player_y][player_x + 1] == 0:
+                    player_x += 1
+            elif game_state == GAME_STATE_QUESTION:
+                if event.key == pygame.K_1:
+                    # Process user answer (1st choice)
+                    # TODO: Add your answer processing logic here
+                    pass
+                elif event.key == pygame.K_2:
+                    # Process user answer (2nd choice)
+                    # TODO: Add your answer processing logic here
+                    pass
+                elif event.key == pygame.K_3:
+                    # Process user answer (3rd choice)
+                    # TODO: Add your answer processing logic here
+                    pass
 
     window.fill(BLACK)
 
-    # Draw the maze
-    for i in range(MAZE_HEIGHT):
-        for j in range(MAZE_WIDTH):
-            if maze[i][j] == 1:
-                pygame.draw.rect(window, WHITE, (j * CELL_SIZE,
-                                 i * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+    if game_state == GAME_STATE_MAZE:
+        # Draw the maze
+        for i in range(MAZE_HEIGHT):
+            for j in range(MAZE_WIDTH):
+                if maze[i][j] == 1:
+                    pygame.draw.rect(
+                        window, WHITE, (j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-    # Draw the player
-    pygame.draw.rect(window, GREEN, (player_x * CELL_SIZE,
-                     player_y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        # Draw the player
+        pygame.draw.rect(window, GREEN, (player_x * CELL_SIZE,
+                         player_y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-    # Draw the destination
-    pygame.draw.rect(window, RED, (destination_x * CELL_SIZE,
-                     destination_y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        # Draw the destination
+        pygame.draw.rect(window, RED, (destination_x * CELL_SIZE,
+                         destination_y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-    # Check if the player has reached the destination
-    if player_x == destination_x and player_y == destination_y:
-        font = pygame.font.Font(None, 36)
-        text = font.render("You Win!", True, WHITE)
-        text_rect = text.get_rect(
-            center=(window_width // 2, window_height // 2))
-        window.blit(text, text_rect)
-        running = False
+        # Check if the player has reached the destination
+        if player_x == destination_x and player_y == destination_y:
+            game_state = GAME_STATE_QUESTION
+
+    elif game_state == GAME_STATE_QUESTION:
+        # Render question and choices
+        font = pygame.font.Font(None, 24)
+        question_text = font.render(questions[0], True, WHITE)
+        window.blit(question_text, (20, 20))
+
+        choice_texts = []
+        for i, choice in enumerate(choices[0]):
+            choice_text = font.render(f"{i+1}. {choice}", True, WHITE)
+            choice_texts.append(choice_text)
+            window.blit(choice_text, (20, 60 + i * 30))
+
+        # Render result (dummy text)
+        result_text = font.render("Correct!", True, WHITE)
+        window.blit(result_text, (20, window_height - 50))
 
     # Update the display
     pygame.display.flip()
