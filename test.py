@@ -3,9 +3,9 @@ import random
 import csv
 
 # Maze parameters
-MAZE_WIDTH = 11
-MAZE_HEIGHT = 11
-CELL_SIZE = 30
+MAZE_WIDTH = 25
+MAZE_HEIGHT = 25
+CELL_SIZE = 20
 WALL_THICKNESS = 4
 
 # Colors
@@ -82,7 +82,7 @@ questions = []
 choices = []
 answers = []
 
-with open("QA.csv", "r") as csvfile:
+with open("QA.csv", "r", encoding="utf-8") as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         question = row["Question"]
@@ -104,6 +104,9 @@ game_state = GAME_STATE_MAZE
 
 # Initialize the result
 result = ""
+
+# Initialize font for displaying Chinese characters
+font = pygame.font.Font("msjhbd.ttc", 24)
 
 # Game loop
 running = True
@@ -141,6 +144,15 @@ while running:
                     else:
                         result = "Wrong!"
 
+                # Remove the answered question
+                questions.pop(0)
+                choices.pop(0)
+                answers.pop(0)
+
+                # Transition back to the maze state if there are more questions
+                if len(questions) > 0:
+                    game_state = GAME_STATE_MAZE
+
     window.fill(BLACK)
 
     if game_state == GAME_STATE_MAZE:
@@ -164,21 +176,30 @@ while running:
             game_state = GAME_STATE_QUESTION
 
     elif game_state == GAME_STATE_QUESTION:
-        # Render question and choices
-        font = pygame.font.Font(None, 24)
-        question_text = font.render(questions[0], True, WHITE)
-        window.blit(question_text, (20, 20))
+        if len(questions) > 0:
+            # Render question and choices
+            question_text = font.render(questions[0], True, WHITE)
+            window.blit(question_text, (20, 20))
 
-        choice_texts = []
-        for i, choice in enumerate(choices[0]):
-            choice_text = font.render(f"{i+1}. {choice}", True, WHITE)
-            choice_texts.append(choice_text)
-            window.blit(choice_text, (20, 60 + i * 30))
+            choice_texts = []
+            for i, choice in enumerate(choices[0]):
+                choice_text = font.render(f"{i+1}. {choice}", True, WHITE)
+                choice_texts.append(choice_text)
+                window.blit(choice_text, (20, 60 + i * 30))
 
-        # Render result
-        result_text_color = GREEN if result == "Correct!" else RED
-        result_text = font.render(result, True, result_text_color)
-        window.blit(result_text, (20, window_height - 50))
+            # Render result
+            result_text_color = GREEN if result == "Correct!" else RED
+            result_text = font.render(result, True, result_text_color)
+            window.blit(result_text, (20, window_height - 50))
+        else:
+            # If no more questions, display game over message
+            game_over_text = font.render("Game Over!", True, WHITE)
+            window.blit(game_over_text, (20, 20))
+
+            # Render final result
+            final_result_text = font.render(
+                "Congratulations, you completed the game!", True, WHITE)
+            window.blit(final_result_text, (20, 60))
 
     # Update the display
     pygame.display.flip()
