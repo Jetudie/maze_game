@@ -1,6 +1,7 @@
 import pygame
 import random
 import csv
+import time
 
 # Maze parameters
 MAZE_WIDTH = 11
@@ -82,6 +83,9 @@ questions = []
 choices = []
 answers = []
 
+# Initialize key repeat settings for smooth movement
+pygame.key.set_repeat(200, 100)
+
 with open("QA.csv", "r", encoding="utf-8") as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -105,7 +109,9 @@ game_state = GAME_STATE_MAZE
 # Initialize the result
 result = ""
 score = 0
+clicked = False
 score_per_question = 5
+prev_score = score
 
 # Initialize font for displaying Chinese characters
 font = pygame.font.Font("msjhbd.ttc", 24)
@@ -138,17 +144,11 @@ while running:
                         if choices[0][choice_index] == answers[0]:
                             result = "Correct!"
                             score += score_per_question
+                            clicked = True
                         else:
                             result = "Wrong!"
+                            clicked = True
 
-                        # Remove the answered question
-                        questions.pop(0)
-                        choices.pop(0)
-                        answers.pop(0)
-
-                        # Transition back to the maze state if there are more questions
-                        if len(questions) > 0:
-                            game_state = GAME_STATE_MAZE
         elif event.type == pygame.KEYDOWN:
             if game_state == GAME_STATE_MAZE:
                 if event.key == pygame.K_UP and maze[player_y - 1][player_x] == 0:
@@ -203,22 +203,37 @@ while running:
 
             score_result = f"score={score}"
             result_text = font.render(result, True, result_text_color)
-            result_text_2 = font.render(score_result, True, WHITE)
-            window.blit(result_text, (20, window_height - 100))
-            window.blit(result_text_2, (20, window_height - 50))
+            score_text = font.render(score_result, True, WHITE)
+
+            window.blit(score_text, (20, window_height - 50))
+            if clicked:
+                # Remove the answered question
+                questions.pop(0)
+                choices.pop(0)
+                answers.pop(0)
+
+                # Transition back to the maze state if there are more questions
+                if len(questions) > 0:
+                    game_state = GAME_STATE_MAZE
+
+                window.blit(result_text, (20, window_height - 100))
+
         else:
             # If no more questions, display game over message
             game_over_text = font.render(
-                f"Game Over!\nScore={score}", True, WHITE)
+                "Well done!", True, WHITE)
             window.blit(game_over_text, (20, 20))
 
             # Render final result
             final_result_text = font.render(
-                "Congratulations, you completed the game!", True, WHITE)
+                f"Well done! Score={score}", True, WHITE)
             window.blit(final_result_text, (20, 60))
 
     # Update the display
     pygame.display.flip()
+    if clicked:
+        clicked = False
+        time.sleep(0.8)
 
 # Quit the game
 pygame.quit()
