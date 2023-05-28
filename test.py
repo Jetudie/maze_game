@@ -3,8 +3,8 @@ import random
 import csv
 
 # Maze parameters
-MAZE_WIDTH = 25
-MAZE_HEIGHT = 25
+MAZE_WIDTH = 11
+MAZE_HEIGHT = 11
 CELL_SIZE = 20
 WALL_THICKNESS = 4
 
@@ -108,12 +108,44 @@ result = ""
 # Initialize font for displaying Chinese characters
 font = pygame.font.Font("msjhbd.ttc", 24)
 
+# Initialize mouse button states
+left_button_down = False
+
 # Game loop
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            left_button_down = True
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            left_button_down = False
+            if game_state == GAME_STATE_QUESTION:
+                # Get the mouse position
+                mouse_x, mouse_y = event.pos
+
+                # Check if the mouse click is within the answer choices area
+                if 20 <= mouse_x <= window_width - 20 and 60 <= mouse_y <= window_height - 50:
+                    # Calculate the index of the clicked choice
+                    choice_index = (mouse_y - 60) // 30
+
+                    # Check if the choice index is within the available choices
+                    if 0 <= choice_index < len(choices[0]):
+                        # Process user answer based on the choice index
+                        if choices[0][choice_index] == answers[0]:
+                            result = "Correct!"
+                        else:
+                            result = "Wrong!"
+
+                        # Remove the answered question
+                        questions.pop(0)
+                        choices.pop(0)
+                        answers.pop(0)
+
+                        # Transition back to the maze state if there are more questions
+                        if len(questions) > 0:
+                            game_state = GAME_STATE_MAZE
         elif event.type == pygame.KEYDOWN:
             if game_state == GAME_STATE_MAZE:
                 if event.key == pygame.K_UP and maze[player_y - 1][player_x] == 0:
