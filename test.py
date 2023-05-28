@@ -22,7 +22,7 @@ pygame.init()
 window_width = MAZE_WIDTH * CELL_SIZE
 window_height = MAZE_HEIGHT * CELL_SIZE
 window = pygame.display.set_mode((window_width, window_height))
-pygame.display.set_caption("Maze Game")
+pygame.display.set_caption("台鐵小遊戲")
 
 # Generate the maze
 # Initialize with all walls
@@ -69,6 +69,10 @@ for i in range(2, MAZE_HEIGHT - 1, 2):
                     break
             if not blocked:
                 maze[i][j] = 1
+
+# Player image
+player_image = pygame.image.load("train.png")
+player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
 
 # Player starting position
 player_x = 1
@@ -172,8 +176,10 @@ while running:
                         window, WHITE, (j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
         # Draw the player
-        pygame.draw.rect(window, GREEN, (player_x * CELL_SIZE,
-                         player_y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        player_rect = player_image.get_rect().move(player_x * CELL_SIZE, player_y * CELL_SIZE)
+        window.blit(player_image, player_rect)
+        # pygame.draw.rect(window, GREEN, (player_x * CELL_SIZE,
+        #                  player_y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
         # Draw the destination
         pygame.draw.rect(window, RED, (destination_x * CELL_SIZE,
@@ -221,12 +227,12 @@ while running:
         else:
             # If no more questions, display game over message
             game_over_text = font.render(
-                "Well done!", True, WHITE)
+                "做完了~真棒!", True, WHITE)
             window.blit(game_over_text, (20, 20))
 
             # Render final result
             final_result_text = font.render(
-                f"Well done! Score={score}", True, WHITE)
+                f"得分: {score}", True, WHITE)
             window.blit(final_result_text, (20, 60))
 
     # Update the display
