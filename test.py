@@ -5,7 +5,7 @@ import csv
 # Maze parameters
 MAZE_WIDTH = 11
 MAZE_HEIGHT = 11
-CELL_SIZE = 20
+CELL_SIZE = 40
 WALL_THICKNESS = 4
 
 # Colors
@@ -104,6 +104,8 @@ game_state = GAME_STATE_MAZE
 
 # Initialize the result
 result = ""
+score = 0
+score_per_question = 5
 
 # Initialize font for displaying Chinese characters
 font = pygame.font.Font("msjhbd.ttc", 24)
@@ -135,6 +137,7 @@ while running:
                         # Process user answer based on the choice index
                         if choices[0][choice_index] == answers[0]:
                             result = "Correct!"
+                            score += score_per_question
                         else:
                             result = "Wrong!"
 
@@ -156,35 +159,8 @@ while running:
                     player_x -= 1
                 elif event.key == pygame.K_RIGHT and maze[player_y][player_x + 1] == 0:
                     player_x += 1
-            elif game_state == GAME_STATE_QUESTION:
-                if event.key == pygame.K_1:
-                    # Process user answer (1st choice)
-                    if choices[0][0] == answers[0]:
-                        result = "Correct!"
-                    else:
-                        result = "Wrong!"
-                elif event.key == pygame.K_2:
-                    # Process user answer (2nd choice)
-                    if choices[0][1] == answers[0]:
-                        result = "Correct!"
-                    else:
-                        result = "Wrong!"
-                elif event.key == pygame.K_3:
-                    # Process user answer (3rd choice)
-                    if choices[0][2] == answers[0]:
-                        result = "Correct!"
-                    else:
-                        result = "Wrong!"
-
-                # Remove the answered question
-                questions.pop(0)
-                choices.pop(0)
-                answers.pop(0)
-
-                # Transition back to the maze state if there are more questions
-                if len(questions) > 0:
-                    game_state = GAME_STATE_MAZE
-
+            else:
+                continue
     window.fill(BLACK)
 
     if game_state == GAME_STATE_MAZE:
@@ -220,12 +196,20 @@ while running:
                 window.blit(choice_text, (20, 60 + i * 30))
 
             # Render result
-            result_text_color = GREEN if result == "Correct!" else RED
+            if result == "Correct!":
+                result_text_color = GREEN
+            else:
+                result_text_color = RED
+
+            score_result = f"score={score}"
             result_text = font.render(result, True, result_text_color)
-            window.blit(result_text, (20, window_height - 50))
+            result_text_2 = font.render(score_result, True, WHITE)
+            window.blit(result_text, (20, window_height - 100))
+            window.blit(result_text_2, (20, window_height - 50))
         else:
             # If no more questions, display game over message
-            game_over_text = font.render("Game Over!", True, WHITE)
+            game_over_text = font.render(
+                f"Game Over!\nScore={score}", True, WHITE)
             window.blit(game_over_text, (20, 20))
 
             # Render final result
