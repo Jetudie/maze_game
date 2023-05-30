@@ -203,7 +203,29 @@ while running:
         if len(questions) > 0:
             # Render question and choices
             question_text = font.render(questions[0], True, WHITE)
-            window.blit(question_text, (20, 20))
+            
+            # Split the question into multiple lines if necessary
+            question_lines = []
+            words = questions[0].split()
+            line = ""
+            for word in words:
+                if font.size(line + " " + word)[0] < window_width - 40:
+                    line += " " + word
+                else:
+                    question_lines.append(line.strip())
+                    line = word
+            question_lines.append(line.strip())
+
+            # Draw the question
+            question_x = 20  # Left margin
+            question_y = 20  # Top margin
+            for line in question_lines:
+                question_surface = font.render(line, True, WHITE)
+                question_rect = question_surface.get_rect(topleft=(question_x, question_y))
+                window.blit(question_surface, question_rect)
+                question_y += 40
+
+            # window.blit(question_text, (20, 20))
 
             choice_texts = []
             selection = ['A', 'B', 'C', 'D']
