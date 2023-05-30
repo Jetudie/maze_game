@@ -18,6 +18,15 @@ RED = (255, 0, 0)
 # Initialize Pygame
 pygame.init()
 
+# Initialize Pygame mixer
+pygame.mixer.init()
+
+# Load the background music
+pygame.mixer.music.load("bgm.mp3")
+
+# Play the background music in an infinite loop
+pygame.mixer.music.play(-1)
+
 # Set up the display
 window_width = MAZE_WIDTH * CELL_SIZE
 window_height = MAZE_HEIGHT * CELL_SIZE
@@ -240,6 +249,9 @@ while running:
     if clicked:
         clicked = False
         time.sleep(0.8)
+
+# Stop the background music when the game loop exits
+pygame.mixer.music.stop()
 
 # Quit the game
 pygame.quit()
