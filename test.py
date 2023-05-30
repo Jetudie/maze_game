@@ -106,9 +106,10 @@ with open("QA.csv", "r", encoding="utf-8") as csvfile:
         choice1 = row["Choice 1"]
         choice2 = row["Choice 2"]
         choice3 = row["Choice 3"]
+        choice4 = row["Choice 4"]
         answer = row["Answer"]
 
-        choices.append([choice1, choice2, choice3])
+        choices.append([choice1, choice2, choice3, choice4])
         questions.append(question)
         answers.append(answer)
 
