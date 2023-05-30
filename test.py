@@ -155,7 +155,7 @@ while running:
                     # Check if the choice index is within the available choices
                     if 0 <= choice_index < len(choices[0]):
                         # Process user answer based on the choice index
-                        if choices[0][choice_index] == answers[0]:
+                        if choice_index == int(answers[0]):
                             result = "Correct!"
                             score += score_per_question
                             clicked = True
@@ -206,8 +206,9 @@ while running:
             window.blit(question_text, (20, 20))
 
             choice_texts = []
+            selection = ['A', 'B', 'C', 'D']
             for i, choice in enumerate(choices[0]):
-                choice_text = font.render(f"{i+1}. {choice}", True, WHITE)
+                choice_text = font.render(f"{selection[i]}. {choice}", True, WHITE)
                 choice_texts.append(choice_text)
                 window.blit(choice_text, (20, 60 + i * 30))
 
