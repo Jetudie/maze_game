@@ -3,9 +3,27 @@ import random
 import csv
 import time
 
+from re import compile as _Re
+_unicode_chr_splitter = _Re( '(?s)((?:[\ud800-\udbff][\udc00-\udfff])|.)' ).split
+def split_unicode_chrs( text ):
+  return [ chr for chr in _unicode_chr_splitter( text ) if chr ]
+
+def chinese_words_to_lines(input_str:str, window_width:int)->list():
+    words = split_unicode_chrs(input_str)
+    line = ""
+    line_list = []
+    for word in words:
+        if font.size(line + " " + word)[0] < window_width - 40:
+            line += word
+        else:
+            line_list.append(line.strip())
+            line = word
+    line_list.append(line.strip())
+    return line_list
+
 # Maze parameters
-MAZE_WIDTH = 11
-MAZE_HEIGHT = 11
+MAZE_WIDTH = 17
+MAZE_HEIGHT = 17
 CELL_SIZE = 40
 WALL_THICKNESS = 4
 
@@ -14,6 +32,12 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+
+# Choices and line
+SELECTION = ['A', 'B', 'C', 'D']
+LINE_DISTANCE = 30
+LEFT_MARGIN = 20
+TOP_MARGIN = 20
 
 # Initialize Pygame
 pygame.init()
@@ -148,19 +172,19 @@ while running:
                 mouse_x, mouse_y = event.pos
 
                 # Check if the mouse click is within the answer choices area
-                if 20 <= mouse_x <= window_width - 20 and 60 <= mouse_y <= window_height - 50:
+                if 20 <= mouse_x <= window_width - 20 and question_y <= mouse_y <= window_height - 50:
                     # Calculate the index of the clicked choice
-                    choice_index = (mouse_y - 60) // 30
+                    choice_index = (mouse_y - question_y) // LINE_DISTANCE
 
                     # Check if the choice index is within the available choices
                     if 0 <= choice_index < len(choices[0]):
                         # Process user answer based on the choice index
-                        if choice_index == int(answers[0]):
-                            result = "Correct!"
+                        if choice_index == int(answers[0]) - 1:
+                            result = f"Correct!"
                             score += score_per_question
                             clicked = True
                         else:
-                            result = "Wrong!"
+                            result = f"Wrong!"
                             clicked = True
 
         elif event.type == pygame.KEYDOWN:
@@ -205,57 +229,48 @@ while running:
             question_text = font.render(questions[0], True, WHITE)
             
             # Split the question into multiple lines if necessary
-            question_lines = []
-            words = questions[0].split()
-            line = ""
-            for word in words:
-                if font.size(line + " " + word)[0] < window_width - 40:
-                    line += " " + word
-                else:
-                    question_lines.append(line.strip())
-                    line = word
-            question_lines.append(line.strip())
+            question_lines = chinese_words_to_lines(questions[0], window_width)
 
             # Draw the question
-            question_x = 20  # Left margin
-            question_y = 20  # Top margin
+            question_x = LEFT_MARGIN  # Left margin
+            question_y = TOP_MARGIN  # Top margin
             for line in question_lines:
                 question_surface = font.render(line, True, WHITE)
                 question_rect = question_surface.get_rect(topleft=(question_x, question_y))
                 window.blit(question_surface, question_rect)
-                question_y += 40
+                question_y += LINE_DISTANCE
 
             # window.blit(question_text, (20, 20))
 
             choice_texts = []
-            selection = ['A', 'B', 'C', 'D']
+            choiec_x = LEFT_MARGIN
+            choiec_y = question_y
             for i, choice in enumerate(choices[0]):
-                choice_text = font.render(f"{selection[i]}. {choice}", True, WHITE)
-                choice_texts.append(choice_text)
-                window.blit(choice_text, (20, 60 + i * 30))
+                choice_lines = chinese_words_to_lines(choice, window_width)
+                for n, line in enumerate(choice_lines):
+                    if n == 0:
+                        choice_surface = font.render(f"{SELECTION[i]}. {line}", True, WHITE)
+                    else:
+                        choice_surface = font.render(line, True, WHITE)
+                    choice_rect = choice_surface.get_rect(topleft=(choiec_x, choiec_y))
+                    window.blit(choice_surface, choice_rect)
+                    choiec_y += LINE_DISTANCE
 
             # Render result
-            if result == "Correct!":
+            if "Correct!" in result:
                 result_text_color = GREEN
             else:
                 result_text_color = RED
 
             score_result = f"score={score}"
+            answer_text = font.render(choices[0][int(answers[0])-1], True, GREEN)
             result_text = font.render(result, True, result_text_color)
             score_text = font.render(score_result, True, WHITE)
 
             window.blit(score_text, (20, window_height - 50))
             if clicked:
-                # Remove the answered question
-                questions.pop(0)
-                choices.pop(0)
-                answers.pop(0)
-
-                # Transition back to the maze state if there are more questions
-                if len(questions) > 0:
-                    game_state = GAME_STATE_MAZE
-
-                window.blit(result_text, (20, window_height - 100))
+                window.blit(answer_text, (20, window_height - 100))
+                window.blit(result_text, (20, window_height - 150))
 
         else:
             # If no more questions, display game over message
@@ -270,9 +285,17 @@ while running:
 
     # Update the display
     pygame.display.flip()
-    if clicked:
+    if game_state == GAME_STATE_QUESTION and clicked:
+        # Remove the answered question
+        questions.pop(0)
+        choices.pop(0)
+        answers.pop(0)
+
+        # Transition back to the maze state if there are more questions
+        if len(questions) > 0:
+            game_state = GAME_STATE_MAZE
         clicked = False
-        time.sleep(0.8)
+        time.sleep(5)
 
 # Stop the background music when the game loop exits
 pygame.mixer.music.stop()
