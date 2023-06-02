@@ -3,6 +3,7 @@ import random
 import csv
 import time
 
+from pathlib import Path
 from re import compile as _Re
 _unicode_chr_splitter = _Re( '(?s)((?:[\ud800-\udbff][\udc00-\udfff])|.)' ).split
 def split_unicode_chrs( text ):
@@ -20,6 +21,16 @@ def chinese_words_to_lines(input_str:str, window_width:int)->list():
             line = word
     line_list.append(line.strip())
     return line_list
+
+# paths
+RESOURCE_PATH = Path.cwd() / 'res'
+AUDIO_PATH = RESOURCE_PATH / 'audio'
+FONT_PATH = RESOURCE_PATH / 'font' / 'msjhbd.ttc'
+IMAGE_PATH = RESOURCE_PATH / 'image'
+
+BGM_PATH = AUDIO_PATH / 'bgm.mp3'
+TRAIN_IMAGE_PATH = IMAGE_PATH / 'train.png'
+QA_CSV_PATH = RESOURCE_PATH / 'QA.csv'
 
 # Maze parameters
 MAZE_WIDTH = 17
@@ -48,7 +59,7 @@ pygame.init()
 pygame.mixer.init()
 
 # Load the background music
-pygame.mixer.music.load("bgm.mp3")
+pygame.mixer.music.load(BGM_PATH)
 
 # Play the background music in an infinite loop
 pygame.mixer.music.play(-1)
@@ -106,7 +117,7 @@ for i in range(2, MAZE_HEIGHT - 1, 2):
                 maze[i][j] = 1
 
 # Player image
-player_image = pygame.image.load("train.png")
+player_image = pygame.image.load(TRAIN_IMAGE_PATH)
 player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
 
 # Player starting position
@@ -125,7 +136,7 @@ answers = []
 # Initialize key repeat settings for smooth movement
 pygame.key.set_repeat(200, 100)
 
-with open("QA.csv", "r", encoding="utf-8") as csvfile:
+with open(QA_CSV_PATH, "r", encoding="utf-8") as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         question = row["Question"]
@@ -154,7 +165,7 @@ score_per_question = 5
 prev_score = score
 
 # Initialize font for displaying Chinese characters
-font = pygame.font.Font("msjhbd.ttc", 24)
+font = pygame.font.Font(FONT_PATH, 24)
 
 # Initialize mouse button states
 left_button_down = False
