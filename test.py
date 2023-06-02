@@ -34,10 +34,12 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 # Choices and line
-SELECTION = ['A', 'B', 'C', 'D']
 LINE_DISTANCE = 30
+LINE_DISTANCE_2 = 50
 LEFT_MARGIN = 20
 TOP_MARGIN = 20
+SELECTION = ['A', 'B', 'C', 'D']
+SELECTION_Y_END = [LINE_DISTANCE] * len(SELECTION)
 
 # Initialize Pygame
 pygame.init()
@@ -172,9 +174,15 @@ while running:
                 mouse_x, mouse_y = event.pos
 
                 # Check if the mouse click is within the answer choices area
-                if 20 <= mouse_x <= window_width - 20 and question_y <= mouse_y <= window_height - 50:
+                if LEFT_MARGIN <= mouse_x <= window_width - LEFT_MARGIN and question_y <= mouse_y <= window_height - LINE_DISTANCE_2:
                     # Calculate the index of the clicked choice
-                    choice_index = (mouse_y - question_y) // LINE_DISTANCE
+                    choice_index = len(choices[0])
+                    choice_range_start = question_y
+                    for index, selection_y_end in enumerate(SELECTION_Y_END):
+                        if choice_range_start < mouse_y <= selection_y_end:
+                            choice_index = index
+                            break
+                        choice_range_start = selection_y_end
 
                     # Check if the choice index is within the available choices
                     if 0 <= choice_index < len(choices[0]):
@@ -255,6 +263,7 @@ while running:
                     choice_rect = choice_surface.get_rect(topleft=(choiec_x, choiec_y))
                     window.blit(choice_surface, choice_rect)
                     choiec_y += LINE_DISTANCE
+                SELECTION_Y_END[i] = choiec_y
 
             # Render result
             if "Correct!" in result:
@@ -267,21 +276,21 @@ while running:
             result_text = font.render(result, True, result_text_color)
             score_text = font.render(score_result, True, WHITE)
 
-            window.blit(score_text, (20, window_height - 50))
+            window.blit(score_text, (LEFT_MARGIN, window_height - LINE_DISTANCE_2))
             if clicked:
-                window.blit(answer_text, (20, window_height - 100))
-                window.blit(result_text, (20, window_height - 150))
+                window.blit(answer_text, (LEFT_MARGIN, window_height - LINE_DISTANCE_2 * 2))
+                window.blit(result_text, (LEFT_MARGIN, window_height - LINE_DISTANCE_2 * 3))
 
         else:
             # If no more questions, display game over message
             game_over_text = font.render(
                 "做完了~真棒!", True, WHITE)
-            window.blit(game_over_text, (20, 20))
+            window.blit(game_over_text, (LEFT_MARGIN, TOP_MARGIN))
 
             # Render final result
             final_result_text = font.render(
                 f"得分: {score}", True, WHITE)
-            window.blit(final_result_text, (20, 60))
+            window.blit(final_result_text, (LEFT_MARGIN, TOP_MARGIN + LINE_DISTANCE * 2))
 
     # Update the display
     pygame.display.flip()
